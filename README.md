@@ -10,7 +10,7 @@ for i in `find ../ -name "*.fastq.gz"`;do echo `basename $i`|cut -f1 -d"_";done|
 
 run the following script in “Data” directory to concatenate the fastq files
 
-for i in `cat sample.txt`;do sbatch /geschwindlabshares/fygaoprj06/GitHub_RNAseqAlignmentPipeline/Script/Alignment/concat.sh $i;done 
+for i in `cat sample.txt`;do sbatch /path_to_/concat.sh $i;done 
 
 Alternatively, you can concatenate files individually, for example,
 
@@ -23,42 +23,42 @@ cat sample1_lane1_R2.fastq.gz sample1_lane2_R2.fastq.gz > sample1_2.fastq.gz
 ##### Generating genome using STAR 
 (For reference, https://github.com/alexdobin/STAR, https://pmc.ncbi.nlm.nih.gov/articles/PMC3530905)
 
-If this is the first time to run STAR, you need to generate genome files with STAR. mm39 genome is available on /geschwindlabshares/fygaoprj06/RNAseq/GenomeMM39/GenomeDir.
 If you need other genome for alignment with STAR, use the following command for genome generation.
  
-/share/apps/STAR/2.7.5c/bin/Linux_x86_64/STAR --runMode genomeGenerate --genomeDir <genome directory> genome.fa --runThreadN 6  --runThreadN 4 --sjdbFileChrStartEnd sjdbInfo.txt --sjdbOverhang 100
+/path_to/STAR --runMode genomeGenerate --genomeDir <genome directory> genome.fa --runThreadN 6  --runThreadN 4 --sjdbFileChrStartEnd sjdbInfo.txt --sjdbOverhang 100
 
 ##### Alignment using STAR 
 
-cd /geschwindlabshares/fygaoprj06/RNAseq/TestData
+cd /path_to/TestData
 
-/geschwindlabshares/fygaoprj06/RNAseq/Script/Alignment/rnaseq_STAR.sh /geschwindlabshares/fygaoprj06/RNAseq/GenomeMM39/GenomeDir
+/Alignment/rnaseq_STAR.sh /path_to/GenomeDir
 
 There will be individual folders for each sample, and the aligned file names Aligned.out.sam
 
 ##### Alignment summary 
 
-/share/apps/R/base/4.0.2/bin/R
+Running R in command line
+/path_to_R/R
 
-setwd("/geschwindlabshares/fygaoprj06/RNAseq/TestData")
+setwd("/TestData")
 
-source("/geschwindlabshares/fygaoprj06/GitHub_RNAseqPipeline/Script/Alignment/AlignmentSummary.R",echo=T) 
+source("/Alignment/AlignmentSummary.R",echo=T) 
 
 ## 2. Convert sam file to bam by samtools and count reads by HTSeq 
 (https://github.com/samtools/samtools) (https://htseq.readthedocs.io/en/release_0.11.1/count.html)
 
 ##### Reverse stranded library such as Truseq
 
-cd /geschwindlabshares/fygaoprj06/RNAseq/TestData
+cd /TestData
 
-for i in `find ./ -name Aligned.out.sam`;do pushd `dirname $i`; sbatch /geschwindlabshares/fygaoprj06/GitHub_RNAseqAlignmentPipeline/Script/Alignment/getcountHT_reversestranded.sh /geschwindlabshares/fygaoprj06/RNAseq/GenomeMM39/Mus_musculus.GRCm39.112.gtf `dirname $i | xargs -I {} basename {}`;popd;done
+for i in `find ./ -name Aligned.out.sam`;do pushd `dirname $i`; sbatch /Alignment/getcountHT_reversestranded.sh /path_to_gtf_file/Mus_musculus.GRCm39.112.gtf `dirname $i | xargs -I {} basename {}`;popd;done
 
 
 ##### Non-stranded library such as SMARTseq v4
 
-cd /geschwindlabshares/fygaoprj06/RNAseq/TestData
+cd /TestData
 
-for i in `find ./ -name Aligned.out.sam`;do pushd `dirname $i`; sbatch /geschwindlabshares/fygaoprj06/RNAseq/Script/Alignment/getcountHT_nonstranded.sh /geschwindlabshares/fygaoprj06/RNAseq/GenomeMM39/Mus_musculus.GRCm39.112.gtf `dirname $i | xargs -I {} basename {}`;popd;done
+for i in `find ./ -name Aligned.out.sam`;do pushd `dirname $i`; sbatch /Alignment/getcountHT_nonstranded.sh /path_to_gtf_file/Mus_musculus.GRCm39.112.gtf `dirname $i | xargs -I {} basename {}`;popd;done
 
 
 ## 3. Alignment QC
@@ -66,13 +66,13 @@ for i in `find ./ -name Aligned.out.sam`;do pushd `dirname $i`; sbatch /geschwin
 Install picard (https://broadinstitute.github.io/picard) if necessary. 
 
 ##### Running PicardTools 
-cd /geschwindlabshares/fygaoprj06/RNAseq/TestData
+cd /TestData
 
-for i in `find ./ -maxdepth 2 -name Aligned.out.sam`;do pushd `dirname $i`;/geschwindlabshares/fygaoprj06/RNAseq/Script/Alignment/sbatch_picard_scripts.sh Aligned.out.sam mm39 y;popd;done
+for i in `find ./ -maxdepth 2 -name Aligned.out.sam`;do pushd `dirname $i`;/Alignment/sbatch_picard_scripts.sh Aligned.out.sam mm39 y;popd;done
 
 To compile the results of PicardTools, run the following script.
 
-/geschwindlabshares/fygaoprj06/RNAseq/Script/Alignment/CompileQCOutput.sh
+/Alignment/CompileQCOutput.sh
 
 You should see PDF for AlignQC, GCbias, GCsummary, InsertSize, RNAseqc and TranscriptCoverage.
 Check the uniformity of transcriptCoverage and InsertSize distribution. StrandBalance should be close to 50% across the board. Note any samples with abnormal values. 
