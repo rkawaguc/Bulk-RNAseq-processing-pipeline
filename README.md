@@ -83,9 +83,6 @@ Raw count barplot provide a quick look of RNA abundance distribution profile. Id
 
 ![image](https://github.com/user-attachments/assets/0ea41867-745a-47ae-8cac-a893d4997b48)
 
-QC.R
-PCA.R
-
 ## 4. Normalization and Expression QC
 
 Removing low abundance genes is cruicial for noise reduction. As read alignment is not 100% accurate, low counts genes are mostly noise. Our default is to remove genes if they are not expressed more than 5 counts for 1/3 of samples. However, this is arbitrary and you can use other criteria such as 1PM (counts per million) for at least 3 samples. 
