@@ -86,12 +86,15 @@ Raw count barplot provide a quick look of RNA abundance distribution profile. Id
 #### Chromosome and genome region distribution of read counts
 
 Create a random 1M reads 
+
 for i in `find $PWD/ -maxdepth 2 -name Aligned.out.sam`;do pushd `dirname $i`;sbatch /coppolalabshares/amrf/RNAseq-tools/Random1mQC.sh;popd;done
 
 Get counts for each chromosome and different genome attributes
+
 for i in `find $PWD/ -maxdepth 2 -name sorted.bam`; do pushd `dirname $i`; sbatch getChrHits_mm10.sh $i; sbatch getHits_N_Mis.sh $i; sbatch getGeneRegionCounts_042021.sh $i refFlat; sbatch getGeneRegionCountsEnsemble.sh $i /path_to_ensembl annotation;popd;done
 
 Compile the results
+
 for i in `find . -name ensembl.coverageSum`;do wc -c $i;done; for i in `find . -name sorted_hits.txt`;do wc -c $i;done; for i in `find . -name sorted_mismatch.txt`;do wc -c $i;done; for i in `find . -name sorted_chrHits.txt`;do wc -c $i;done;for i in `find . -name refFlat.coverageSum`;do wc -c $i;done;
 
 rm result/hitCount.xls;rm result/c*;rm result/mismatch.xls
@@ -101,6 +104,7 @@ head -1 result/metaReadCount_mm10_refSeq.xls >result/mismatch.xls;head -1 result
 find . -maxdepth 2 -name sorted_chrHits.txt -exec cjoin.awk {} + >> result/chrHits.xls;find . -maxdepth 2 -name sorted_mismatch.txt -exec cjoin.awk {} + >> result/mismatch.xls;find . -maxdepth 2 -name sorted_hits.txt -exec cjoin.awk {} + >> result/hitCount.xls;find . -maxdepth 2 -name refFlat.coverageSum -exec cjoin.awk {} + >> result/coverage.xls ;find . -maxdepth 2 -name ensembl.coverageSum -exec cjoin.awk {} + >> result/coverage2.xls 
 
 Getting gene region counts
+
 ./getGeneRegionCounts.sh sorted.bam /path_to_refFlat
 
 ## 4. Normalization and Expression QC
